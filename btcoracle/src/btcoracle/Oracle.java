@@ -12,6 +12,7 @@ class Oracle {
 	**/
 	private String btcVerify() {
 		// Throws BitcoinException on bad signature
+		return "";
 	}
 
 	/**
@@ -20,6 +21,7 @@ class Oracle {
 	* @return: Outcome of python code
 	**/
 	private boolean pyVerify(String pyHash) {
+		return false;
 
 	}
 
@@ -29,7 +31,7 @@ class Oracle {
 	* @return: signed transaction
 	**/
 	private String signTransaction() {
-
+		return "";
 	}
 
 
@@ -43,14 +45,14 @@ class Oracle {
 
 
 
-		String pyHash;
+		String pyHash = "";
 		try {
 			pyHash = btcVerify();
 		} catch (BitcoinException e) {
 			// Append 400 status and error message, return
 		}
 
-		boolean resp;
+		boolean resp = false;
 		try {
 			resp = pyVerify(pyHash);
 		} catch (BitcoinException e) {
