@@ -1,6 +1,7 @@
 package btcoracle;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,17 +10,20 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import org.json.JSONObject;
 
-class Oracle {
-	private String python;
-	private String transaction;
+import fi.iki.elonen.*;
+import fi.iki.elonen.NanoHTTPD.Response.Status;
+
+class Oracle extends NanoHTTPD{
+	public String python;
+	public String transaction;
 	
-	private static URL bitcoinURL;
-	private static final String rpcauth = "dGVzdHVzZXI6dGVzdHBhc3N3b3Jk";
-	private static final String oracle = "n2aziZuwMDNXpzn3DbwtT1schaK1tjaYem";
+	public static URL bitcoinURL;
+	public static final String rpcauth = "dGVzdHVzZXI6dGVzdHBhc3N3b3Jk";
+	//public static final String oracle = "n2aziZuwMDNXpzn3DbwtT1schaK1tjaYem";
 	
 	static {
 		try {
@@ -28,6 +32,10 @@ class Oracle {
 			e.printStackTrace();
 			bitcoinURL = null;
 		}
+	}
+	
+	public Oracle() {
+		super(8000); // Start Webserver
 	}
 	
 	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -94,7 +102,7 @@ class Oracle {
 	* Parses Bitcoin String, Verifies that it is signed correctly.
 	* @return Hash of the python code
 	**/
-	private String btcVerify() {
+	public String btcVerify() {
 		// Throws BitcoinException on bad signature
 		JSONObject js = sendBTCRequest(new JSONObject("{\"method\":\"decoderawtransaction\",\"params\":[\""+transaction+"\"], \"id\":1 }"));
 		try {
@@ -114,7 +122,7 @@ class Oracle {
 	* @param: Hash of the python code
 	* @return: Outcome of python code
 	**/
-	private boolean pyVerify(String pyHash) {
+	public boolean pyVerify(String pyHash) {
 		// Check Hash
 		MessageDigest md = null;
 		try {
@@ -140,13 +148,10 @@ class Oracle {
 		}
 	}
 
-
-	public Oracle(String newPython, String newTransaction) {
+	public JSONObject response(String newPython, String newTransaction) {
 		this.python = newPython;
 		this.transaction = newTransaction;
-	}
-
-	public JSONObject response() {
+		
 		JSONObject ret = new JSONObject();
 
 		String pyHash = "";
@@ -172,21 +177,6 @@ class Oracle {
 
 		if (resp) {
 			// Sign, set status to 200, message to signed transactione 
-			
-			// Dump Oracle Private Key
-			/*
-			JSONObject js = sendBTCRequest(new JSONObject("{ \"method\": \"dumpprivkey\", \"params\": [\""+oracle+"\"], \"id\": 1}"));
-			String privKey = js.getString("result");
-			
-			StringBuilder sb = new StringBuilder();
-			sb.append("{\"method\":\"signrawtransaction\",\"params\":[\"");
-			sb.append(this.transaction);
-			sb.append("\", [], [\"");
-			sb.append(privKey);
-			sb.append("\"], \"id\":\"1\"}");
-			
-			js = sendBTCRequest(new JSONObject(sb.toString()));
-			*/
 			JSONObject js = new JSONObject("{\"method\":\"signrawtransaction\",\"params\":[\"" + transaction + "\"],\"id\":1}");
 			js = sendBTCRequest(js);
 			js = js.getJSONObject("result");
@@ -206,20 +196,78 @@ class Oracle {
 		return ret;
 	}
 	
+	// Server Command
+	@Override public Response serve(IHTTPSession session) {
+        Method method = session.getMethod();
+        String uri = session.getUri();
+        System.out.println(method + " '" + uri + "' ");
+        
+        NanoHTTPD.Response resp;
+
+        
+        Map<String, String> parms = session.getParms();
+        if (parms.get("btcTransaction") == null || parms.get("pyCode") == null) {
+        	String msg = "<html><body><h1>Basic Oracle</h1>\n";
+            msg +=
+                    "<form action='' method='get'>\n" +
+                            "  <p>Raw BTC Transaction: <textarea name='btcTransaction'></textarea></p>\n" +
+                            "  <p>Python Code: <textarea name='pyCode'></textarea></p>\n" +
+                            "  <input type='submit' value='Submit' />\n" +
+                            "</form>\n";
+            msg += "</body></html>\n";
+            resp = new Response(msg);
+        } else {
+            JSONObject js = response(parms.get("pyCode"), parms.get("btcTransaction"));
+            
+            Status st;
+            switch(js.getJSONArray("status").getInt(0)) {
+            case 200:
+            	st = NanoHTTPD.Response.Status.OK;
+            	break;
+            case 400:
+            	st = NanoHTTPD.Response.Status.BAD_REQUEST;
+            	break;
+            default:
+            	st = NanoHTTPD.Response.Status.INTERNAL_ERROR;
+            }
+            
+            resp = new Response(st, "application/json", new ByteArrayInputStream(js.toString().getBytes()));
+        }
+        
+        return resp;
+    }
+	
 	public static void main(String args[]) {
-		String python = "print 1"; // Hash: 0fe75885d4d27dd7814dc32f92bc02d3bc6aa0130252bb1d59a55ed3da65af50
+		//String python = "print 1"; // Hash: 0fe75885d4d27dd7814dc32f92bc02d3bc6aa0130252bb1d59a55ed3da65af50
 		
 		// This transaction has been partially signed with the above python hash.
+		/*
 		String transaction = "01000000014335203f6187813bd2ab9916c73a6a6cc57e42c8f595a1c8faddcaf1ca9c420f000000009200483045022100b67ced6086c9ecf6c347d5e504ed8daa24c97a02806d9393cb2ed9982164b61b0220728e61159f1077b35615778b3f74e95962cfabc58d0f9e25779fe017c1f2b4f701475221039ba952b74676cedb0ddd0eb5c23d78db31e57a871d8350b29004301a73203e5321020a1b1653f15b1cd7b4b1667fff5b938845feced1141e11f38ccd9f3191b3f93552aeffffffff0100e1f505000000003b200fe75885d4d27dd7814dc32f92bc02d3bc6aa0130252bb1d59a55ed3da65af507576a914499790b616de77ebc49a116a9f2e854bc0783cca88ac00000000";
-		Oracle o = new Oracle(python, transaction);
-		
-		//System.out.println(Oracle.sendBTCRequest(new JSONObject("{\"method\":\"decoderawtransaction\",\"params\":[],\"id\":1}")).toString());
-		
+		Oracle o = new Oracle(python, transaction);	
 		
 		JSONObject ans = o.response();
 		System.out.println(ans.toString());
-		//System.out.println("Status: " + ans.getString("status"));
-		//System.out.println("Data: " + ans.getString("data"));
+		System.out.println("Status: " + ans.getJSONArray("status").getInt(0));
+		System.out.println("Data: " + ans.getJSONArray("data").getString(0));
+		*/
 		
+		NanoHTTPD server = new Oracle();
+		
+		try {
+            server.start();
+        } catch (IOException ioe) {
+            System.err.println("Couldn't start server:\n" + ioe);
+            System.exit(-1);
+        }
+
+        System.out.println("Server started, Hit Enter to stop.\n");
+
+        try {
+            System.in.read();
+        } catch (Throwable ignored) {
+        }
+
+        server.stop();
+        System.out.println("Server stopped.\n");
 	}
 }
