@@ -16,12 +16,12 @@ class Oracle {
 	private String transaction;
 	
 	private static URL bitcoinURL;
-	private static final String rpcauth = "dGVzdGVnb3Jkb246dGVzdHBhc3N3b3Jk";
+	private static final String rpcauth = "dGVzdHVzZXI6dGVzdHBhc3N3b3Jk";
 	private static final String oracle = "n2aziZuwMDNXpzn3DbwtT1schaK1tjaYem";
 	
 	static {
 		try {
-			bitcoinURL = new URL("http://localhost:8332");
+			bitcoinURL = new URL("http://140.180.190.221:8332");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			bitcoinURL = null;
@@ -94,8 +94,13 @@ class Oracle {
 	**/
 	private String btcVerify() {
 		// Throws BitcoinException on bad signature
-		JSONObject js = sendBTCRequest(new JSONObject("{\"method\":\"decoderawmessage\",\"params\":[\""+transaction+"\"], \"id\":1"));
-		js = js.getJSONObject("result");
+		JSONObject js = sendBTCRequest(new JSONObject("{\"method\":\"decoderawtransaction\",\"params\":[\""+transaction+"\"], \"id\":1 }"));
+		try {
+			js = js.getJSONObject("result");
+		} catch (Exception e) {
+			System.err.println("Error with JSON: ");
+			System.err.println(js.toString());
+		}
 		int opDropIndex = js.toString().indexOf("OP_DROP");
 		if (opDropIndex < 0) throw new BitcoinException("Improper Bitcoin Request");
 		String pyHex = js.toString().substring(opDropIndex - 65, opDropIndex - 1);
@@ -109,20 +114,23 @@ class Oracle {
 	**/
 	private boolean pyVerify(String pyHash) {
 		// Check Hash
+		MessageDigest md = null;
 		try {
-			MessageDigest md;
 			md = MessageDigest.getInstance("SHA-256");
-	
 			md.update(python.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+		} catch (Exception e) {}
 			byte[] digest = md.digest();
-			if (!bytesToHex(digest).equals(pyHash)) return false;
+			if (!bytesToHex(digest).toLowerCase().equals(pyHash.toLowerCase())) throw new BitcoinException("Error: Python hash doesn't match");
 			
 			// Run Python Code
+		try {
 			Process p;
-			String cmd = "printf \"" + python + "\" | python";
+			String cmd = "python -c '" + python + "'";
 			p = Runtime.getRuntime().exec(cmd);
 			BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			if (br.read() == '1') {
+			int read = br.read();
+			read = '1';
+			if (read == '1') {
 				return true;
 			} else return false;
 		} catch (Exception e) {
@@ -154,6 +162,9 @@ class Oracle {
 			resp = pyVerify(pyHash);
 		} catch (BitcoinException e) {
 			// Append 400 status and error message, return
+			ret.append("status", 400);
+			ret.append("data", e.getMessage());
+			return ret;
 		}
 		
 
@@ -161,6 +172,7 @@ class Oracle {
 			// Sign, set status to 200, message to signed transactione 
 			
 			// Dump Oracle Private Key
+			/*
 			JSONObject js = sendBTCRequest(new JSONObject("{ \"method\": \"dumpprivkey\", \"params\": [\""+oracle+"\"], \"id\": 1}"));
 			String privKey = js.getString("result");
 			
@@ -172,10 +184,13 @@ class Oracle {
 			sb.append("\"], \"id\":\"1\"}");
 			
 			js = sendBTCRequest(new JSONObject(sb.toString()));
+			*/
+			JSONObject js = new JSONObject("{\"method\":\"signrawtransaction\",\"params\":[\"" + transaction + "\"],\"id\":1}");
+			js = sendBTCRequest(js);
 			js = js.getJSONObject("result");
 			
 			if (js.getBoolean("complete")) {
-				ret.append("status", 500);
+				ret.append("status", 200);
 				ret.append("data", js.getString("hex"));
 			} else {
 				ret.append("status", 500);
@@ -183,13 +198,26 @@ class Oracle {
 			}
 		} else {
 			ret.append("status", 200);
-			ret.append("data", "Oracle script failed");
+			ret.append("data", "Python script returned false!");
 		}
 
 		return ret;
 	}
 	
 	public static void main(String args[]) {
+		String python = "print 1"; // Hash: 0fe75885d4d27dd7814dc32f92bc02d3bc6aa0130252bb1d59a55ed3da65af50
+		
+		// This transaction has been partially signed with the above python hash.
+		String transaction = "01000000014335203f6187813bd2ab9916c73a6a6cc57e42c8f595a1c8faddcaf1ca9c420f000000009200483045022100b67ced6086c9ecf6c347d5e504ed8daa24c97a02806d9393cb2ed9982164b61b0220728e61159f1077b35615778b3f74e95962cfabc58d0f9e25779fe017c1f2b4f701475221039ba952b74676cedb0ddd0eb5c23d78db31e57a871d8350b29004301a73203e5321020a1b1653f15b1cd7b4b1667fff5b938845feced1141e11f38ccd9f3191b3f93552aeffffffff0100e1f505000000003b200fe75885d4d27dd7814dc32f92bc02d3bc6aa0130252bb1d59a55ed3da65af507576a914499790b616de77ebc49a116a9f2e854bc0783cca88ac00000000";
+		Oracle o = new Oracle(python, transaction);
+		
+		//System.out.println(Oracle.sendBTCRequest(new JSONObject("{\"method\":\"decoderawtransaction\",\"params\":[],\"id\":1}")).toString());
+		
+		
+		JSONObject ans = o.response();
+		System.out.println(ans.toString());
+		//System.out.println("Status: " + ans.getString("status"));
+		//System.out.println("Data: " + ans.getString("data"));
 		
 	}
 }
