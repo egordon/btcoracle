@@ -1,1 +1,0 @@
-eval(raw_input())

@@ -1,5 +1,7 @@
 package btcoracle;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -124,13 +126,13 @@ class Oracle {
 			
 			// Run Python Code
 		try {
-			Process p;
-			String cmd = "python -c '" + python + "'";
-			p = Runtime.getRuntime().exec(cmd);
-			BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			int read = br.read();
-			read = '1';
-			if (read == '1') {
+			BufferedWriter out = new BufferedWriter(new FileWriter("prog.py"));
+			out.write(python);
+			out.close();
+			Process p = Runtime.getRuntime().exec("python prog.py");
+			BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			int ret = new Integer(in.readLine()).intValue();
+			if (ret == 1) {
 				return true;
 			} else return false;
 		} catch (Exception e) {
