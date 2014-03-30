@@ -23,7 +23,7 @@ class Oracle extends NanoHTTPD{
 	
 	public static URL bitcoinURL;
 	public static final String rpcauth = "dGVzdHVzZXI6dGVzdHBhc3N3b3Jk";
-	//public static final String oracle = "n2aziZuwMDNXpzn3DbwtT1schaK1tjaYem";
+	//public static final String oracle = "msMdx4CQHf2E5dNVFnibxAgXH6AqSV1d1C";
 	
 	static {
 		try {
