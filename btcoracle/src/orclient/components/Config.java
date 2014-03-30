@@ -1,6 +1,5 @@
 package orclient.components;
 
-import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -13,16 +12,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
-public class Config extends Application {
-	public static void main(String[] args) {
-		launch(args);
-	}
+public class Config {
+	private Stage stage;
+	private Scene scene;
+	private GridPane grid;
 
-	@Override
-	public void start(Stage stage) {
-		stage.setTitle("Config");
-
-		GridPane grid = new GridPane();
+	public Config(final Main main) {
+		grid = new GridPane();
 		grid.setHgap(10);
 		grid.setVgap(10);
 		grid.setPadding(new Insets(10, 10, 10, 10));
@@ -31,9 +27,9 @@ public class Config extends Application {
 		grid.getColumnConstraints().add(new ColumnConstraints(100));
 		grid.getColumnConstraints().get(1).setHgrow(Priority.ALWAYS);
 
-		Label lblURL = new Label("Oracle URL: ");
-		Label lblPublicKey = new Label("Oracle public key: ");
-		Label lblAddress = new Label("Local address: ");
+		Label lblURL = new Label("Oracle URL:");
+		Label lblPublicKey = new Label("Oracle public key:");
+		Label lblAddress = new Label("Local address:");
 
 		final TextField tfURL = new TextField();
 		final TextField tfPublicKey = new TextField();
@@ -49,11 +45,12 @@ public class Config extends Application {
 			}
 		});
 
-		Button btnNext = new Button("Next");
+		Button btnNext = new Button("Proceed");
 		btnNext.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				System.out.println("let us proceed");
+				// TODO egordon what do you want to do with the info?
+				main.gotoHome(stage);
 			}
 		});
 
@@ -67,9 +64,16 @@ public class Config extends Application {
 
 		grid.add(btnGen, 2, 2, 1, 1);
 		grid.add(btnNext, 0, 3);
+	}
 
-		stage.setScene(new Scene(grid));
-		stage.setResizable(false);
-		stage.show();
+	public Scene getScene() {
+		if (scene == null) {
+			scene = new Scene(grid);
+		}
+		return scene;
+	}
+
+	public void setStage(Stage stage) {
+		this.stage = stage;
 	}
 }
