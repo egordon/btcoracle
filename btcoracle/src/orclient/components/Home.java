@@ -151,7 +151,9 @@ public class Home {
 				JSONObject js = GlobalConfig.getTransaction(txid);
 				String signed = js.getString("partialSigned");
 				String python = js.getString("python");
-				LocalBTC.sendToOracle(signed, URLEncoder.encode(python));
+				JSONObject fullSigned = LocalBTC.sendToOracle(signed, URLEncoder.encode(python));
+				System.out.println(fullSigned);
+				
 			}
 		});
 
