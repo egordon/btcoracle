@@ -35,6 +35,7 @@ public class Hasher {
 		sb.append(transaction.substring(0, pubKeyIndex - 2));
 		sb.append("3b20"); // New Size of scriptPubKey and hash size
 		sb.append(hash);
+		sb.append("75");
 		sb.append(transaction.substring(pubKeyIndex));
 		return sb.toString();
 	}

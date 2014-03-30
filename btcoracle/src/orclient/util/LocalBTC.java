@@ -80,7 +80,9 @@ public class LocalBTC {
 	
 	public static String signTransaction(String transaction) {
 		JSONObject js = new JSONObject("{\"method\":\"signrawtransaction\", \"params\": [\""+transaction+"\"], \"id\": 1}");
+		System.out.println(transaction);
 		js = sendBTCRequest(js);
+		System.out.println(js);
 		return js.getJSONObject("result").getString("hex");
 	}
 	
@@ -136,7 +138,20 @@ public class LocalBTC {
 	}
 	
 	public static void main(String args[]) {
+		String txid = "a65981f01ee341690e8bf2528033427ae25936603b85e73e05028846eea59c21";
+		String rec = "mwEh6oCjBFFWfe4KVbQTdGhG89aEMn9bDK";
+		double amt = 1.0;
 		
+		String raw = LocalBTC.createTransaction(txid, rec, amt);
+		raw = Hasher.addHashToTransaction(raw, Hasher.sha256("print 1"));
+		String signed = LocalBTC.signTransaction(raw);
+		String python = "print 1";
+		String pyHash = Hasher.sha256(python);
+		String confirmed = "0";
+		String fullSigned = "";
+		
+		GlobalConfig.writeTransaction(txid, raw, signed, "", "0", python, pyHash);
+		System.out.println(GlobalConfig.getTransaction(txid));
 	}
 
 }
