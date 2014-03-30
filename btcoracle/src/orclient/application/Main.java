@@ -1,10 +1,10 @@
 package orclient.application;
 
+import javafx.application.Application;
+import javafx.stage.Stage;
 import orclient.components.Config;
 import orclient.components.Home;
 import orclient.util.LocalBTC;
-import javafx.application.Application;
-import javafx.stage.Stage;
 
 public class Main extends Application {
 	private Config config;
@@ -15,6 +15,7 @@ public class Main extends Application {
 			System.err.println("Cannot find bitcoind! Please install it to use this app: https://en.bitcoin.it/wiki/Bitcoind");
 			System.exit(1);
 		}
+		
 		launch(args);
 	}
 

@@ -1,8 +1,5 @@
 package orclient.components;
 
-import orclient.application.Main;
-import orclient.util.GlobalConfig;
-import orclient.util.LocalBTC;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -12,8 +9,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import orclient.application.Main;
+import orclient.util.GlobalConfig;
+import orclient.util.LocalBTC;
 
 public class Config {
 	private Stage stage;
@@ -34,9 +33,10 @@ public class Config {
 		Label lblAddress = new Label("Local address:");
 
 		final TextField tfURL = new TextField("http://btcoracle.ethankgordon.com:8000/");
-		final TextField tfPublicKey = new TextField("020a1b1653f15b1cd7b4b1667fff5b938845feced1141e11f38ccd9f3191b3f935");
+		final TextField tfPublicKey = new TextField(
+				"020a1b1653f15b1cd7b4b1667fff5b938845feced1141e11f38ccd9f3191b3f935");
 		final TextField tfAddress = new TextField("muWaKb8inQaBWBKgiCVq794DLH6FyXgiot");
-		//tfAddress.setDisable(true);
+		// tfAddress.setDisable(true);
 
 		Button btnGen = new Button("Generate");
 		btnGen.setOnAction(new EventHandler<ActionEvent>() {
@@ -54,17 +54,17 @@ public class Config {
 				GlobalConfig.globalConfig.put("sendAddress", tfAddress.getText());
 				GlobalConfig.globalConfig.put("oracleURL", tfURL.getText());
 				GlobalConfig.globalConfig.put("oraclePubKey", tfPublicKey.getText());
-				
+
 				// Generate the Multisig Address
 				String localPubKey = LocalBTC.getPubKey(GlobalConfig.globalConfig.get("sendAddress"));
-				GlobalConfig.globalConfig.put("multisig", LocalBTC.generateMultisigAddress(localPubKey, 
-						GlobalConfig.globalConfig.get("oraclePubKey")));
-				
+				GlobalConfig.globalConfig.put("multisig",
+						LocalBTC.generateMultisigAddress(localPubKey, GlobalConfig.globalConfig.get("oraclePubKey")));
+
 				// Account
 				GlobalConfig.globalConfig.put("account", "orclient");
-				
+
 				LocalBTC.assignAccount(GlobalConfig.globalConfig.get("sendAddress"), "orclient");
-				
+
 				main.gotoHome(stage);
 			}
 		});
