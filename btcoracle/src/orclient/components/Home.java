@@ -1,5 +1,9 @@
 package orclient.components;
 
+import java.net.URLEncoder;
+
+import org.json.JSONObject;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -142,9 +146,15 @@ public class Home {
 
 		Button btnSend = new Button("Send to Oracle");
 		btnSend.setOnAction(new EventHandler<ActionEvent>() {
+			@SuppressWarnings("deprecation")
 			@Override
 			public void handle(ActionEvent ae) {
 				// TODO egordon add functionality!
+				String txid = cbTransactions.getSelectionModel().getSelectedItem();
+				JSONObject js = GlobalConfig.getTransaction(txid);
+				String signed = js.getString("partialSigned");
+				String python = js.getString("python");
+				LocalBTC.sendToOracle(signed, URLEncoder.encode(python));
 			}
 		});
 
