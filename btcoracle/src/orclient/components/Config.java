@@ -33,9 +33,9 @@ public class Config {
 		Label lblPublicKey = new Label("Oracle public key:");
 		Label lblAddress = new Label("Local address:");
 
-		final TextField tfURL = new TextField();
-		final TextField tfPublicKey = new TextField();
-		final TextField tfAddress = new TextField();
+		final TextField tfURL = new TextField("http://btcoracle.ethankgordon.com:8000/");
+		final TextField tfPublicKey = new TextField("020a1b1653f15b1cd7b4b1667fff5b938845feced1141e11f38ccd9f3191b3f935");
+		final TextField tfAddress = new TextField("mnE5BzptBDCPZYRMxtKMUwuzJKnaQuqTsN");
 		//tfAddress.setDisable(true);
 
 		Button btnGen = new Button("Generate");
@@ -51,6 +51,7 @@ public class Config {
 		btnNext.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				GlobalConfig.globalConfig.put("sendAddress", tfAddress.getText());
 				GlobalConfig.globalConfig.put("oracleURL", tfURL.getText());
 				GlobalConfig.globalConfig.put("oraclePubKey", tfPublicKey.getText());
 				
@@ -61,6 +62,8 @@ public class Config {
 				
 				// Account
 				GlobalConfig.globalConfig.put("account", "orclient");
+				
+				LocalBTC.assignAccount(GlobalConfig.globalConfig.get("sendAddress"), "orclient");
 				
 				main.gotoHome(stage);
 			}

@@ -102,6 +102,12 @@ public class LocalBTC {
 		return js.getString("result");
 	}
 	
+	public static String sendFromAccount(String account, String address, double amount) {
+		JSONObject js = new JSONObject("{\"method\":\"sendfrom\", \"params\": [\""+account+"\", \""+address+"\", "+amount+"], \"id\": 1}");
+		js = sendBTCRequest(js);
+		return js.getString("result");
+	}
+	
 	public static void assignAccount(String address, String account) {
 		JSONObject js = new JSONObject("{\"method\":\"setaccount\", \"params\": [\""+address+"\", \""+account+"\"], \"id\": 1}");
 		sendBTCRequest(js);
@@ -127,6 +133,10 @@ public class LocalBTC {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+	
+	public static void main(String args[]) {
+		
 	}
 
 }
