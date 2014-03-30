@@ -181,7 +181,8 @@ public class Home {
 					LocalBTC.sendTransaction(fs);
 					GlobalConfig.confirmTX(txid, fs);
 				}
-				cbTransactions.getSelectionModel().clearAndSelect(cbTransactions.getSelectionModel().getSelectedIndex());
+				int index = cbTransactions.getSelectionModel().getSelectedIndex();
+				cbTransactions.getSelectionModel().clearAndSelect(index);
 				popup.show();
 			}
 		});

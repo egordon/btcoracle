@@ -209,9 +209,9 @@ class Oracle extends NanoHTTPD{
         Map<String, String> parms = session.getParms();
         if (parms.get("btcTransaction") == null || parms.get("pyCode") == null) {
         	String msg = "<html><body><h1>Basic Oracle</h1><h2>Public Key: 020a1b1653f15b1cd7b4b1667fff5b938845feced1141e11f38ccd9f3191b3f935</h2>\n";
-            msg +=
+            msg += "<h3>Use the Oracle manually below or try out the client from <a href='https://github.com/egordon/btcoracle'>Github</a>!\n" +
                     "<form action='' method='get'>\n" +
-                            "  <p>Raw BTC Transaction: <textarea name='btcTransaction'></textarea></p>\n" +
+                            "  <p>Raw BTC Transaction (Hex String): <textarea name='btcTransaction'></textarea></p>\n" +
                             "  <p>Python Code: <textarea name='pyCode'></textarea></p>\n" +
                             "  <input type='submit' value='Submit' />\n" +
                             "</form>\n";
