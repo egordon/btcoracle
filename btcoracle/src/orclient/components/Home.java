@@ -2,13 +2,12 @@ package orclient.components;
 
 import java.net.URLEncoder;
 
-import org.json.JSONObject;
-
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -21,10 +20,15 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import orclient.util.GlobalConfig;
 import orclient.util.Hasher;
 import orclient.util.LocalBTC;
+
+import org.json.JSONObject;
 
 public class Home {
 	private Stage stage;
@@ -141,6 +145,20 @@ public class Home {
 			cbTransactions.getSelectionModel().selectFirst();
 		}
 
+		final Stage popup = new Stage();
+		popup.initModality(Modality.WINDOW_MODAL);
+		final Label message = new Label("");
+		final Button button = new Button("OK");
+		button.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent ae) {
+				popup.close();
+			}
+		});
+		popup.setScene(new Scene(VBoxBuilder.create().children(message, button).alignment(Pos.CENTER)
+				.padding(new Insets(5)).build()));
+		popup.show();
+
 		Button btnSend = new Button("Send to Oracle");
 		btnSend.setOnAction(new EventHandler<ActionEvent>() {
 			@SuppressWarnings("deprecation")
@@ -152,8 +170,10 @@ public class Home {
 				String signed = js.getString("partialSigned");
 				String python = js.getString("python");
 				JSONObject fullSigned = LocalBTC.sendToOracle(signed, URLEncoder.encode(python));
-				System.out.println(fullSigned);
 				
+				if (fullSigned.getString("data").length() < 50) message.setText("Oracle failed to sign transaction.");
+				else message.setText("Transaction success!");
+				popup.show();
 			}
 		});
 
