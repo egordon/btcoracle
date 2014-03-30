@@ -53,11 +53,12 @@ public class Home {
 		final TextField tfRec = new TextField();
 		final TextField tfAmt = new TextField();
 		final TextArea taPython = new TextArea();
+		taPython.setStyle("-fx-font-family: \"Courier New\";");
 		
 		Button btnSign = new Button("Sign Transaction");
 		btnSign.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
-			public void handle(ActionEvent arg0) {
+			public void handle(ActionEvent ae) {
 				//TODO: Sign Transaction Script
 				String txid = LocalBTC.sendFromAccount(GlobalConfig.globalConfig.get("account"), GlobalConfig.globalConfig.get("sendAddress"), Double.parseDouble(tfAmt.getText()));
 				String raw = LocalBTC.createTransaction(txid, tfRec.getText(),  Double.parseDouble(tfAmt.getText()));
@@ -85,12 +86,13 @@ public class Home {
 		generate.add(lblWarning, 0, 5, 2, 1);
 		generate.add(btnSign, 2, 5, 1, 1);
 		
-		vbox = new VBox(50);
+		vbox = new VBox(25);
 		vbox.setPadding(new Insets(50, 50, 50, 50));
 		vbox.getChildren().addAll(vboxRb, generate);
-		
+
 		group.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){
-		    public void changed(ObservableValue<? extends Toggle> ov,
+		    @Override
+			public void changed(ObservableValue<? extends Toggle> ov,
 		        Toggle toggle, Toggle new_toggle) {
 		            vbox.getChildren().remove(1);
 		            vbox.getChildren().add((NewForm)group.getSelectedToggle().getUserData());
