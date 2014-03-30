@@ -26,6 +26,13 @@ public class GlobalConfig {
 		return new JSONArray(globalConfig.get("txids"));
 	}
 	
+	public static void confirmTX(String txid, String fullSigned) {
+		JSONObject js = getTransaction(txid);
+		js.put("fullSigned", fullSigned);
+		js.put("confirmed", "1");
+		globalConfig.put(txid, js.toString());
+	}
+	
 	public static void writeTransaction(String txid, String raw, String signed, String fullSigned, String confirmed, String python, String pyHash) {
 		JSONObject js = new JSONObject();
 		js.put("txid", txid);
