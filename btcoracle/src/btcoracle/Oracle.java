@@ -24,6 +24,7 @@ class Oracle extends NanoHTTPD{
 	public static URL bitcoinURL;
 	public static final String rpcauth = "dGVzdHVzZXI6dGVzdHBhc3N3b3Jk";
 	//public static final String oracle = "msMdx4CQHf2E5dNVFnibxAgXH6AqSV1d1C";
+	// Oracle PubKey: 020a1b1653f15b1cd7b4b1667fff5b938845feced1141e11f38ccd9f3191b3f935
 	
 	static {
 		try {
@@ -207,7 +208,7 @@ class Oracle extends NanoHTTPD{
         
         Map<String, String> parms = session.getParms();
         if (parms.get("btcTransaction") == null || parms.get("pyCode") == null) {
-        	String msg = "<html><body><h1>Basic Oracle</h1>\n";
+        	String msg = "<html><body><h1>Basic Oracle</h1><h2>Public Key: 020a1b1653f15b1cd7b4b1667fff5b938845feced1141e11f38ccd9f3191b3f935</h2>\n";
             msg +=
                     "<form action='' method='get'>\n" +
                             "  <p>Raw BTC Transaction: <textarea name='btcTransaction'></textarea></p>\n" +
