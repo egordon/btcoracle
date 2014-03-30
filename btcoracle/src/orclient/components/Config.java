@@ -1,5 +1,6 @@
 package orclient.components;
 
+import orclient.application.Main;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -25,7 +26,6 @@ public class Config {
 		grid.getColumnConstraints().add(new ColumnConstraints(150));
 		grid.getColumnConstraints().add(new ColumnConstraints(300));
 		grid.getColumnConstraints().add(new ColumnConstraints(100));
-		grid.getColumnConstraints().get(1).setHgrow(Priority.ALWAYS);
 
 		Label lblURL = new Label("Oracle URL:");
 		Label lblPublicKey = new Label("Oracle public key:");

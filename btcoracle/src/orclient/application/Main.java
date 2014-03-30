@@ -1,5 +1,7 @@
-package orclient.components;
+package orclient.application;
 
+import orclient.components.Config;
+import orclient.components.Home;
 import javafx.application.Application;
 import javafx.stage.Stage;
 

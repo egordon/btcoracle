@@ -12,10 +12,7 @@ public class Home {
 	private Scene scene;
 	private VBox vbox;
 
-	public Home() {
-		vbox = new VBox(50);
-		vbox.setPadding(new Insets(50, 50, 50, 50));
-		
+	public Home() {		
 		final ToggleGroup group = new ToggleGroup();
 		RadioButton rb1 = new RadioButton("Create a new transaction");
 		RadioButton rb2 = new RadioButton("Review existing transactions");
@@ -26,7 +23,11 @@ public class Home {
 		VBox vboxRb = new VBox(10);
 		vboxRb.getChildren().addAll(rb1, rb2);
 		
-		vbox.getChildren().add(vboxRb);
+		NewForm form = new NewForm();
+		
+		vbox = new VBox(50);
+		vbox.setPadding(new Insets(50, 50, 50, 50));
+		vbox.getChildren().addAll(vboxRb, form);
 	}
 
 	public Scene getScene() {
