@@ -27,11 +27,13 @@ public class Home {
 	private Scene scene;
 	private VBox vbox;
 
+	private ToggleGroup group;
+	
 	private NewForm generate;
 	private NewForm review;
 
 	public Home() {
-		final ToggleGroup group = new ToggleGroup();
+		group = new ToggleGroup();
 		RadioButton rb1 = new RadioButton("Create a new transaction");
 		RadioButton rb2 = new RadioButton("Review existing transactions");
 		rb1.setToggleGroup(group);
@@ -98,7 +100,7 @@ public class Home {
 				// Now write to global config
 				GlobalConfig.writeTransaction(txid, raw, signed, fullSigned, confirmed, python, pyHash);
 
-				// TODO: Toggle back to other radio.
+				group.selectToggle(group.getToggles().get(1));
 			}
 		});
 
