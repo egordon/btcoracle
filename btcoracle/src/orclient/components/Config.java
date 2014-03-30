@@ -1,6 +1,8 @@
 package orclient.components;
 
 import orclient.application.Main;
+import orclient.util.GlobalConfig;
+import orclient.util.LocalBTC;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -34,14 +36,14 @@ public class Config {
 		final TextField tfURL = new TextField();
 		final TextField tfPublicKey = new TextField();
 		final TextField tfAddress = new TextField();
-		tfAddress.setDisable(true);
+		//tfAddress.setDisable(true);
 
 		Button btnGen = new Button("Generate");
 		btnGen.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
-				// TODO egordon fill this out!
-				tfAddress.setText(Math.random() + "");
+				GlobalConfig.globalConfig.put("sendAddress", LocalBTC.newBTCAddress());
+				tfAddress.setText(GlobalConfig.globalConfig.get("sendAddress"));
 			}
 		});
 
@@ -49,7 +51,17 @@ public class Config {
 		btnNext.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				// TODO egordon what do you want to do with the info?
+				GlobalConfig.globalConfig.put("oracleURL", tfURL.getText());
+				GlobalConfig.globalConfig.put("oraclePubKey", tfPublicKey.getText());
+				
+				// Generate the Multisig Address
+				String localPubKey = LocalBTC.getPubKey(GlobalConfig.globalConfig.get("sendAddress"));
+				GlobalConfig.globalConfig.put("multisig", LocalBTC.generateMultisigAddress(localPubKey, 
+						GlobalConfig.globalConfig.get("oraclePubKey")));
+				
+				// Account
+				GlobalConfig.globalConfig.put("account", "orclient");
+				
 				main.gotoHome(stage);
 			}
 		});

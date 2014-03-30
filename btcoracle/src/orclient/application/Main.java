@@ -2,6 +2,7 @@ package orclient.application;
 
 import orclient.components.Config;
 import orclient.components.Home;
+import orclient.util.LocalBTC;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -10,6 +11,10 @@ public class Main extends Application {
 	private Home home;
 
 	public static void main(String[] args) {
+		if(!LocalBTC.checkBitcoind()) {
+			System.err.println("Cannot find bitcoind! Please install it to use this app: https://en.bitcoin.it/wiki/Bitcoind");
+			System.exit(1);
+		}
 		launch(args);
 	}
 

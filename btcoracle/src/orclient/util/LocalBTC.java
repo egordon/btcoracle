@@ -102,11 +102,27 @@ public class LocalBTC {
 		return js.getString("result");
 	}
 	
+	public static void assignAccount(String address, String account) {
+		JSONObject js = new JSONObject("{\"method\":\"setaccount\", \"params\": [\""+address+"\", \""+account+"\"], \"id\": 1}");
+		sendBTCRequest(js);
+	}
+	
+	public static Boolean checkBitcoind() {
+		try {
+			JSONObject js = new JSONObject("{\"method\":\"help\", \"params\": [], \"id\": 1}");
+			js = sendBTCRequest(js);
+			js.getString("result");
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
 	public static Boolean sendTransaction(String transaction) {
 		try {
 			JSONObject js = new JSONObject("{\"method\":\"sendrawtransaction\", \"params\": [\""+transaction+"\"], \"id\": 1}");
 			js = sendBTCRequest(js);
-			String test = js.getString("result");
+			js.getString("result");
 			return true;
 		} catch (Exception e) {
 			return false;
