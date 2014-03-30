@@ -146,7 +146,8 @@ public class Home {
 		}
 
 		final Stage popup = new Stage();
-		popup.initModality(Modality.WINDOW_MODAL);
+		popup.initModality(Modality.APPLICATION_MODAL);
+		popup.setTitle("Notice");
 		final Label message = new Label("");
 		final Button button = new Button("OK");
 		button.setOnAction(new EventHandler<ActionEvent>() {
@@ -155,9 +156,11 @@ public class Home {
 				popup.close();
 			}
 		});
-		popup.setScene(new Scene(VBoxBuilder.create().children(message, button).alignment(Pos.CENTER)
-				.padding(new Insets(5)).build()));
-		popup.show();
+		VBox popupVbox = new VBox(10);
+		popupVbox.setAlignment(Pos.CENTER);
+		popupVbox.setPadding(new Insets(10, 10, 10, 10));
+		popupVbox.getChildren().addAll(message, button);
+		popup.setScene(new Scene(popupVbox, 200, 150));
 
 		Button btnSend = new Button("Send to Oracle");
 		btnSend.setOnAction(new EventHandler<ActionEvent>() {
@@ -170,9 +173,15 @@ public class Home {
 				String signed = js.getString("partialSigned");
 				String python = js.getString("python");
 				JSONObject fullSigned = LocalBTC.sendToOracle(signed, URLEncoder.encode(python));
-				
-				if (fullSigned.getString("data").length() < 50) message.setText("Oracle failed to sign transaction.");
-				else message.setText("Transaction success!");
+				String fs = fullSigned.getJSONArray("data").getString(0);
+				System.out.println(fullSigned);
+				if (fs.length() < 50) message.setText("Oracle failed to sign \ntransaction.");
+				else {
+					message.setText("Transaction success!");
+					LocalBTC.sendTransaction(fs);
+					GlobalConfig.confirmTX(txid, fs);
+				}
+				cbTransactions.getSelectionModel().clearAndSelect(cbTransactions.getSelectionModel().getSelectedIndex());
 				popup.show();
 			}
 		});
