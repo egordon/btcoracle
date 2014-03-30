@@ -32,6 +32,7 @@ public class Home {
 	private VBox vbox;
 
 	private ToggleGroup group;
+	private ComboBox<String> cbTransactions;
 	
 	private NewForm generate;
 	private NewForm review;
@@ -103,7 +104,7 @@ public class Home {
 
 				// Now write to global config
 				GlobalConfig.writeTransaction(txid, raw, signed, fullSigned, confirmed, python, pyHash);
-
+				cbTransactions.getItems().add(txid);
 				group.selectToggle(group.getToggles().get(1));
 			}
 		});
@@ -123,11 +124,8 @@ public class Home {
 		review = new NewForm();
 		review.setVgap(10);
 
-		final ComboBox<String> cbTransactions = new ComboBox<String>();
+		cbTransactions = new ComboBox<String>();
 		cbTransactions.setVisibleRowCount(6);
-		for (int i = 0; i < GlobalConfig.allTXID().length(); i++) {
-			cbTransactions.getItems().add(GlobalConfig.allTXID().getString(i));
-		}
 
 		final TextArea taDetails = new TextArea();
 		taDetails.setStyle("-fx-font-family: \"Courier New\";");
@@ -142,7 +140,6 @@ public class Home {
 		if (!cbTransactions.getItems().isEmpty()) {
 			cbTransactions.getSelectionModel().selectFirst();
 		}
-		GridPane.setVgrow(taDetails, Priority.ALWAYS);
 
 		Button btnSend = new Button("Send to Oracle");
 		btnSend.setOnAction(new EventHandler<ActionEvent>() {
@@ -158,6 +155,10 @@ public class Home {
 			}
 		});
 
+		GridPane.setHgrow(cbTransactions, Priority.ALWAYS);
+		GridPane.setHgrow(taDetails, Priority.ALWAYS);
+		GridPane.setVgrow(taDetails, Priority.ALWAYS);
+		
 		review.add(cbTransactions, 0, 0);
 		review.add(taDetails, 0, 1);
 		review.add(btnSend, 0, 2);
