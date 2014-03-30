@@ -13,6 +13,7 @@ import org.json.JSONObject;
 public class LocalBTC {
 	
 	public static URL bitcoinURL;
+	
 	public static final String rpcauth = "dGVzdGVnb3Jkb246dGVzdHBhc3N3b3Jk";
 	
 	static {
@@ -80,9 +81,7 @@ public class LocalBTC {
 	
 	public static String signTransaction(String transaction) {
 		JSONObject js = new JSONObject("{\"method\":\"signrawtransaction\", \"params\": [\""+transaction+"\"], \"id\": 1}");
-		System.out.println(transaction);
 		js = sendBTCRequest(js);
-		System.out.println(js);
 		return js.getJSONObject("result").getString("hex");
 	}
 	
@@ -137,6 +136,53 @@ public class LocalBTC {
 		}
 	}
 	
+	public static JSONObject sendToOracle(String signedTransaction, String python) {
+		JSONObject ret = null;
+		
+		HttpURLConnection conn = null;
+		URL url = null;
+		try {
+			url = new URL(GlobalConfig.globalConfig.get("oracleURL") + "?btcTransaction="+signedTransaction+"&pyCode="+python);
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			System.exit(1);
+		}
+		
+		try {
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+			conn.setRequestProperty("Content-Type", "application/json");
+			conn.setRequestProperty("Accept", "application/json");
+			conn.setRequestMethod("GET");
+			
+			
+			StringBuilder sb = new StringBuilder();
+			
+			int httpRes = conn.getResponseCode();
+				
+				BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(),"utf-8"));  
+
+			    String line = null;  
+
+			    while ((line = br.readLine()) != null) {  
+			    sb.append(line + "\n");  
+			    }  
+
+			    br.close(); 
+			    
+			    ret = new JSONObject(sb.toString());
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			conn.disconnect();
+		}
+		
+		return ret;
+	}
+	
 	public static void main(String args[]) {
 		String txid = "a65981f01ee341690e8bf2528033427ae25936603b85e73e05028846eea59c21";
 		String rec = "mwEh6oCjBFFWfe4KVbQTdGhG89aEMn9bDK";
@@ -150,8 +196,8 @@ public class LocalBTC {
 		String confirmed = "0";
 		String fullSigned = "";
 		
-		GlobalConfig.writeTransaction(txid, raw, signed, "", "0", python, pyHash);
-		System.out.println(GlobalConfig.getTransaction(txid));
+		GlobalConfig.globalConfig.put("oracleURL", "http://btcoracle.ethankgordon.com:8000/");
+		System.out.println(LocalBTC.sendToOracle(signed, "print+1"));
 	}
 
 }
