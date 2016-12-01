@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 
 public class Hasher {
 	
+	// Code Snippet From: https://stackoverflow.com/a/9855338
 	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 	public static String bytesToHex(byte[] bytes) {
 	    char[] hexChars = new char[bytes.length * 2];
